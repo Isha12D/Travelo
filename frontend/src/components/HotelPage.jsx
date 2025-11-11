@@ -27,7 +27,7 @@ const HotelsPage = () => {
   }, [city]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 py-10 px-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 py-16 px-6">
       <div className="max-w-6xl mx-auto bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-8">
         <h1 className="text-3xl sm:text-4xl font-bold text-center text-blue-700 mb-8 drop-shadow-md">
           🏨 Hotels in {city}
