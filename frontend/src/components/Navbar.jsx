@@ -1,23 +1,23 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useContext } from 'react'; 
+import { useNavigate, Link } from 'react-router-dom';
 import { UserContext } from '../userContext';
 import { FaUserCircle } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user, setUser } = useContext(UserContext); // get user and setter
+  const { user, setUser } = useContext(UserContext);
   const [isOpen, setIsOpen] = useState(false);
-  const [showLogout, setShowLogout] = useState(false); // toggle logout dropdown
+  const [showLogout, setShowLogout] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const handleRegClick = () => navigate('/register');
 
   const handleLogout = () => {
-    setUser(null); // clear context
-    localStorage.removeItem('user'); // clear storage
+    setUser(null);
+    localStorage.removeItem('user');
     setShowLogout(false);
-    navigate('/'); // redirect home
+    navigate('/');
   };
 
   return (
@@ -27,14 +27,14 @@ const Navbar = () => {
 
         {/* Desktop Links */}
         <div className="hidden lg:flex items-center space-x-4">
-          <Link className="text-white">Home</Link>
+          <Link to="/" className="text-white">Home</Link>
           {!user && (
             <button onClick={handleRegClick} className="text-white">
               Log In
             </button>
           )}
-          <a href="#explore" className="text-white">Explore</a>
-          <a href="#contact" className="text-white">Contact Us</a>
+          <Link to="/package" className="text-white">Explore</Link>
+          <Link to="/contact" className="text-white">Contact Us</Link>
 
           {user && (
             <div className="relative ml-4">
@@ -69,12 +69,12 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="lg:hidden flex flex-col space-y-2 p-4 bg-black">
-          <a href="#home" className="text-white">Home</a>
+          <Link to="/" className="text-white">Home</Link>
           {!user && (
             <button onClick={handleRegClick} className="text-white text-left">Log In</button>
           )}
-          <a href="#explore" className="text-white">Explore</a>
-          <a href="#contact" className="text-white">Contact Us</a>
+          <Link to="/package" className="text-white">Explore</Link>
+          <Link to="/contact" className="text-white">Contact Us</Link>
           {user && (
             <div className="mt-2 relative">
               <FaUserCircle
