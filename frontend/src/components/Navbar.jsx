@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../userContext';
 import { FaUserCircle } from 'react-icons/fa';
-
+import { Link } from 'react-router-dom';
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext); // get user and setter
@@ -27,7 +27,7 @@ const Navbar = () => {
 
         {/* Desktop Links */}
         <div className="hidden lg:flex items-center space-x-4">
-          <a href="#home" className="text-white">Home</a>
+          <Link className="text-white">Home</Link>
           {!user && (
             <button onClick={handleRegClick} className="text-white">
               Log In

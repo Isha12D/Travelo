@@ -27,6 +27,30 @@ const data = [
     imageUrl:
       "https://images.pexels.com/photos/8629979/pexels-photo-8629979.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
   },
+  {
+    id: 4,
+    content: "Srinagar",
+    videoUrl:
+      "https://videos.pexels.com/video-files/20530145/20530145-sd_540_960_30fps.mp4",
+    imageUrl:
+      "https://images.pexels.com/photos/8629979/pexels-photo-8629979.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  },
+  {
+    id: 5,
+    content: "Srinagar",
+    videoUrl:
+      "https://videos.pexels.com/video-files/20530145/20530145-sd_540_960_30fps.mp4",
+    imageUrl:
+      "https://images.pexels.com/photos/8629979/pexels-photo-8629979.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  },
+  {
+    id: 6,
+    content: "Srinagar",
+    videoUrl:
+      "https://videos.pexels.com/video-files/20530145/20530145-sd_540_960_30fps.mp4",
+    imageUrl:
+      "https://images.pexels.com/photos/8629979/pexels-photo-8629979.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  },
 ];
 
 const ITEMS_PER_PAGE = 3;
@@ -43,13 +67,9 @@ export const Package = () => {
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handlePlayVideo = (id) => {
-    setPlayingVideos((prev) => ({ ...prev, [id]: true }));
-  };
-
   const openModal = (city) => {
     setModalCity(city);
-    setDays(1); // default
+    setDays(1);
   };
 
   const closeModal = () => setModalCity(null);
@@ -61,44 +81,77 @@ export const Package = () => {
   return (
     <div className="container mx-auto text-center pt-4 pb-8 bg-blue-400 min-h-screen">
       <h1 className="text-white font-bold text-5xl font-mono py-2">Packages</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2 p-8">
-        {currentItems.map((item) => (
-          <div
-            key={item.id}
-            className="bg-blue-100 p-6 rounded-lg shadow-md hover:shadow-lg hover:shadow-blue-500 cursor-pointer"
-            onClick={() => openModal(item.content)}
+
+      {/* Grid + arrows wrapper */}
+      <div className="relative mt-2 p-8">
+
+        {/* Left arrow */}
+        {currentPage > 1 && (
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-blue-800 p-3 rounded-full shadow hover:bg-gray-200 z-10"
           >
-            <div className="flex-grow flex items-center justify-center">
-              {playingVideos[item.id] ? (
-                <video
-                  width="100%"
-                  height="100%"
-                  controls
-                  autoPlay
-                  loop
-                  muted
-                  className="w-full h-96 object-cover"
-                >
-                  <source src={item.videoUrl} type="video/mp4" />
-                </video>
-              ) : (
-                <img
-                  src={item.imageUrl}
-                  alt={item.content}
-                  className="w-full h-96 object-cover"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePlayVideo(item.id);
-                  }}
-                />
-              )}
+            ◀
+          </button>
+        )}
+
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {currentItems.map((item) => (
+            <div
+              key={item.id}
+              className="bg-blue-100 p-6 rounded-lg shadow-md hover:shadow-lg hover:shadow-blue-500 cursor-pointer relative"
+              onClick={() => openModal(item.content)}
+            >
+              <div
+                className="flex-grow flex items-center justify-center relative w-full h-96 overflow-hidden"
+                onMouseEnter={() =>
+                  setPlayingVideos((prev) => ({ ...prev, [item.id]: true }))
+                }
+                onMouseLeave={() =>
+                  setPlayingVideos((prev) => ({ ...prev, [item.id]: false }))
+                }
+              >
+                {playingVideos[item.id] ? (
+                  <video
+                    width="100%"
+                    height="100%"
+                    autoPlay
+                    loop
+                    muted
+                    className="w-full h-full object-cover"
+                  >
+                    <source src={item.videoUrl} type="video/mp4" />
+                  </video>
+                ) : (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.content}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold mt-4">{item.content}</h2>
+                <p className="text-gray-700 mt-2">Details about {item.content}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold mt-4">{item.content}</h2>
-              <p className="text-gray-700 mt-2">Details about {item.content}</p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* Right arrow */}
+        {currentPage * ITEMS_PER_PAGE < data.length && (
+          <button
+            onClick={() =>
+              setCurrentPage((prev) =>
+                prev * ITEMS_PER_PAGE < data.length ? prev + 1 : prev
+              )
+            }
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-800 p-3 rounded-full shadow hover:bg-gray-200 z-10"
+          >
+            ▶
+          </button>
+        )}
       </div>
 
       {/* Modal */}
@@ -117,7 +170,9 @@ export const Package = () => {
               >
                 <FaMinusCircle />
               </button>
-              <span className="text-xl font-bold">{days} {days===1?"day":"days"}</span>
+              <span className="text-xl font-bold">
+                {days} {days === 1 ? "day" : "days"}
+              </span>
               <button
                 onClick={() => setDays(days + 1)}
                 className="text-green-500 text-2xl"

@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const HotelsPage = () => {
   const { city } = useParams();
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selectedHotel, setSelectedHotel] = useState(null); // hotel to book
-  const [days, setDays] = useState(1); // default 1 day
+  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [days, setDays] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
 
-  const user = JSON.parse(localStorage.getItem("user")); // get user info
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchHotels = async () => {
@@ -30,32 +31,64 @@ const HotelsPage = () => {
 
   const handleBookClick = (hotel) => {
     setSelectedHotel(hotel);
-    setDays(Number(localStorage.getItem("days") || 1)); // optional if you stored days
-    setTotalPrice(hotel.pricePerNight * days);
+    setDays(1);
+    setTotalPrice(hotel.pricePerNight * 1);
     setShowModal(true);
   };
 
   const handleConfirmBooking = async () => {
-    try {
-      const bookingData = {
-        userId: user.id,           // user ID from localStorage
-        hotelId: selectedHotel.id, // hotel ID
-        city,
-        days,
-        totalPrice,
-      };
+    if (!user?.id || !selectedHotel?.id) {
+      Swal.fire({
+        title: "Error",
+        text: "User or Hotel ID missing.",
+        icon: "error",
+      });
+      return;
+    }
 
+    const bookingData = {
+      userId: user.id,
+      hotelId: selectedHotel.id,
+      city,
+      days,
+      totalPrice,
+    };
+
+    try {
       const res = await axios.post("http://localhost:8080/user/booking", bookingData);
 
       if (res.status === 200 || res.status === 201) {
-        alert(`Booking confirmed for ${user.name} at ${selectedHotel.name}!`);
         setShowModal(false);
+        Swal.fire({
+          title: "Booking Confirmed!",
+          text: `Your booking at ${selectedHotel.name} for ${days} day(s) is successful.`,
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "OK",
+        });
+
+        // Optionally update UI: decrease available rooms
+        setHotels((prev) =>
+          prev.map((h) =>
+            h.id === selectedHotel.id
+              ? { ...h, availableRooms: h.availableRooms - 1 }
+              : h
+          )
+        );
       } else {
-        alert(res.data.error || "Booking failed!");
+        Swal.fire({
+          title: "Booking Failed",
+          text: res.data?.message || "Something went wrong!",
+          icon: "error",
+        });
       }
     } catch (err) {
       console.error("Booking error:", err);
-      alert(err.response?.data?.error || "Server error while booking.");
+      Swal.fire({
+        title: "Error",
+        text: err.response?.data?.message || "Server error while booking.",
+        icon: "error",
+      });
     }
   };
 
@@ -111,12 +144,10 @@ const HotelsPage = () => {
           </div>
         )}
 
-        {/* Modal */}
         {showModal && selectedHotel && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div className="bg-white rounded-2xl p-6 w-80 relative">
               <h2 className="text-xl font-semibold text-center mb-4">Book {selectedHotel.name}</h2>
-              
               <div className="space-y-3">
                 <div>
                   <label className="block text-gray-700">Name</label>
@@ -156,7 +187,6 @@ const HotelsPage = () => {
                   />
                 </div>
               </div>
-
               <div className="flex justify-between mt-6">
                 <button
                   onClick={() => setShowModal(false)}

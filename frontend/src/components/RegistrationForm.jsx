@@ -1,19 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
 import { UserContext } from "../userContext";
-
-
-
+import Swal from "sweetalert2";
 
 export const RegistrationForm = () => {
-    const { setUser } = useContext(UserContext);
-const [modal, setModal] = useState({ show: false, type: "success", message: "" });
-  
-
-
-
+  const { setUser } = useContext(UserContext);
 
   const [values, setValues] = useState({
     name: "",
@@ -24,10 +16,7 @@ const [modal, setModal] = useState({ show: false, type: "success", message: "" }
   const navigate = useNavigate();
 
   const handleInput = (e) => {
-    setValues((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setValues((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -43,29 +32,44 @@ const [modal, setModal] = useState({ show: false, type: "success", message: "" }
 
       const res = await axios.post(endpoint, values);
       console.log("✅ Server response:", res.data);
- if (res.status === 200 || res.status === 201) {
+
+      if (res.status === 200 || res.status === 201) {
         setUser(res.data.user);
         localStorage.setItem("user", JSON.stringify(res.data.user));
 
-        setModal({ show: true, type: "success", message: res.data.message || "Success!" });
-        setTimeout(() => {
-          setModal({ ...modal, show: false });
+        // SweetAlert2 success
+        Swal.fire({
+          title: isLogin ? "Login Successful!" : "Registration Successful!",
+          text: res.data.message || "Welcome!",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "OK",
+        }).then(() => {
           navigate("/");
-        }, 1500);
+        });
       } else {
-        setModal({ show: true, type: "error", message: res.data.error || "Something went wrong!" });
+        Swal.fire({
+          title: "Failed",
+          text: res.data.error || "Something went wrong!",
+          icon: "error",
+        });
       }
     } catch (err) {
+      console.error(err);
       let errorMsg = "Request error";
       if (err.response) errorMsg = err.response.data.error || errorMsg;
       else if (err.request) errorMsg = "No response from server";
 
-      setModal({ show: true, type: "error", message: errorMsg });
+      Swal.fire({
+        title: "Error",
+        text: errorMsg,
+        icon: "error",
+      });
     }
   };
 
   return (
-    <div className="bg-blue-900 p-1 sm:p-14">
+    <div className="bg-blue-900 h-[735px] p-1 sm:p-14">
       <div className="container mx-auto text-center pb-4 bg-blue-900">
         <h1 className="text-white font-bold text-4xl sm:text-5xl md:text-6xl lg:text-5xl font-mono py-1 sm:py-2">
           Travelo
@@ -167,7 +171,6 @@ const [modal, setModal] = useState({ show: false, type: "success", message: "" }
           </form>
         </div>
       </div>
-      
     </div>
   );
 };
