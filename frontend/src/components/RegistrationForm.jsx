@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../userContext";
+import Swal from "sweetalert2";
 
 export const RegistrationForm = () => {
+  const { setUser } = useContext(UserContext);
+
   const [values, setValues] = useState({
     name: "",
     email: "",
@@ -12,10 +16,7 @@ export const RegistrationForm = () => {
   const navigate = useNavigate();
 
   const handleInput = (e) => {
-    setValues((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setValues((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -33,25 +34,42 @@ export const RegistrationForm = () => {
       console.log("✅ Server response:", res.data);
 
       if (res.status === 200 || res.status === 201) {
-        alert(res.data.message || "Success!");
-        navigate("/ok");
+        setUser(res.data.user);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+
+        // SweetAlert2 success
+        Swal.fire({
+          title: isLogin ? "Login Successful!" : "Registration Successful!",
+          text: res.data.message || "Welcome!",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "OK",
+        }).then(() => {
+          navigate("/");
+        });
       } else {
-        alert(res.data.error || "Something went wrong!");
+        Swal.fire({
+          title: "Failed",
+          text: res.data.error || "Something went wrong!",
+          icon: "error",
+        });
       }
     } catch (err) {
-      console.error("❌ Request error:", err);
-      if (err.response) {
-        alert(err.response.data.error || "Server responded with an error.");
-      } else if (err.request) {
-        alert("No response from server. Check backend connection.");
-      } else {
-        alert("Request error. Check console for details.");
-      }
+      console.error(err);
+      let errorMsg = "Request error";
+      if (err.response) errorMsg = err.response.data.error || errorMsg;
+      else if (err.request) errorMsg = "No response from server";
+
+      Swal.fire({
+        title: "Error",
+        text: errorMsg,
+        icon: "error",
+      });
     }
   };
 
   return (
-    <div className="bg-blue-900 p-1 sm:p-14">
+    <div className="bg-blue-900 h-[735px] p-1 sm:p-14">
       <div className="container mx-auto text-center pb-4 bg-blue-900">
         <h1 className="text-white font-bold text-4xl sm:text-5xl md:text-6xl lg:text-5xl font-mono py-1 sm:py-2">
           Travelo
